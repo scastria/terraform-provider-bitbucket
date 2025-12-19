@@ -11,6 +11,11 @@ import (
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
+			"workspace": {
+				Type:        schema.TypeString,
+				Required:    true,
+				DefaultFunc: schema.EnvDefaultFunc("BB_WORKSPACE", nil),
+			},
 			"access_token": {
 				Type:          schema.TypeString,
 				Optional:      true,
@@ -44,13 +49,18 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("BB_RETRY_DELAY", 30),
 			},
 		},
-		ResourcesMap:         map[string]*schema.Resource{},
-		DataSourcesMap:       map[string]*schema.Resource{},
+		ResourcesMap: map[string]*schema.Resource{
+			"bitbucket_repository": resourceRepository(),
+		},
+		DataSourcesMap: map[string]*schema.Resource{
+			"bitbucket_project": dataSourceProject(),
+		},
 		ConfigureContextFunc: providerConfigure,
 	}
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	workspace := d.Get("workspace").(string)
 	accessToken := d.Get("access_token").(string)
 	clientId := d.Get("client_id").(string)
 	clientSecret := d.Get("client_secret").(string)
@@ -63,7 +73,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	}
 
 	var diags diag.Diagnostics
-	c, err := client.NewClient(ctx, accessToken, clientId, clientSecret, numRetries, retryDelay)
+	c, err := client.NewClient(ctx, workspace, accessToken, clientId, clientSecret, numRetries, retryDelay)
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}

@@ -1,0 +1,23 @@
+# Resource: bitbucket_repository
+Represents a repository within a project
+## Example usage
+```hcl
+data "bitbucket_project" "Proj" {
+  key = "MyProjectKey"
+}
+resource "bitbucket_repository" "example" {
+  project_id = data.bitbucket_project.Proj.id
+  key = "MyRepoKey"
+  name = "My-Repo"
+  is_private = true
+}
+```
+## Argument Reference
+* `project_id` - **(Required, String)** The id of the project.
+* `key` - **(Required, String)** The key of the repository.
+* `name` - **(Optional, String)** The name of the repository.
+* `is_private` - **(Optional, Boolean)** Whether the repository is private. Default: `true`
+## Attribute Reference
+* `id` - **(String)** The UUID of the repository.
+## Import
+Repositories can be imported using a proper value of `id` as described above

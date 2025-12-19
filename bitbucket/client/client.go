@@ -24,6 +24,7 @@ const (
 )
 
 type Client struct {
+	Workspace    string
 	accessToken  string
 	clientId     string
 	clientSecret string
@@ -32,8 +33,9 @@ type Client struct {
 	httpClient   *http.Client
 }
 
-func NewClient(ctx context.Context, accessToken string, clientId string, clientSecret string, numRetries int, retryDelay int) (*Client, error) {
+func NewClient(ctx context.Context, workspace string, accessToken string, clientId string, clientSecret string, numRetries int, retryDelay int) (*Client, error) {
 	c := &Client{
+		Workspace:    workspace,
 		accessToken:  accessToken,
 		clientId:     clientId,
 		clientSecret: clientSecret,
@@ -114,9 +116,9 @@ func (c *Client) HttpRequest(ctx context.Context, method string, path string, qu
 	}
 	requestDump, err := httputil.DumpRequest(req, true)
 	if err != nil {
-		tflog.Info(ctx, "Bitbucket API:", map[string]any{"error": err})
+		tflog.Error(ctx, "Bitbucket API:", map[string]any{"error": err})
 	} else {
-		tflog.Info(ctx, "Bitbucket API: ", map[string]any{"request": string(requestDump)})
+		tflog.Error(ctx, "Bitbucket API: ", map[string]any{"request": string(requestDump)})
 	}
 	try := 0
 	var resp *http.Response
@@ -148,5 +150,5 @@ func (c *Client) HttpRequest(ctx context.Context, method string, path string, qu
 }
 
 func (c *Client) RequestPath(path string) string {
-	return fmt.Sprintf("https://%s/%s", BBApiServerUrl, path)
+	return fmt.Sprintf("%s/%s", BBApiServerUrl, path)
 }
