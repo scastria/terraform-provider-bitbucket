@@ -40,6 +40,12 @@ func resourceRepository() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
+			"use_existing": {
+				Type:             schema.TypeBool,
+				Optional:         true,
+				Default:          false,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool { return d.Id() != "" },
+			},
 		},
 	}
 }
@@ -64,23 +70,40 @@ func fillResourceDataFromRepository(c *client.Repository, d *schema.ResourceData
 func resourceRepositoryCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*client.Client)
-	buf := bytes.Buffer{}
 	key := d.Get("key").(string)
-	newRepository := client.Repository{}
-	fillRepository(&newRepository, d)
-	err := json.NewEncoder(&buf).Encode(newRepository)
-	if err != nil {
-		d.SetId("")
-		return diag.FromErr(err)
+	useExisting := d.Get("use_existing").(bool)
+	var body *bytes.Buffer = nil
+	var err error
+	if useExisting {
+		// Try to read an existing repo with the given key and return it if found
+		requestPath := fmt.Sprintf(client.RepositoryPath, c.Workspace, key)
+		body, err = c.HttpRequest(ctx, http.MethodGet, requestPath, nil, nil, &bytes.Buffer{})
+		if err != nil {
+			re := err.(*client.RequestError)
+			if re.StatusCode != http.StatusNotFound {
+				return diag.FromErr(err)
+			}
+			body = nil
+		}
 	}
-	requestPath := fmt.Sprintf(client.RepositoryPath, c.Workspace, key)
-	requestHeaders := http.Header{
-		headers.ContentType: []string{client.ApplicationJson},
-	}
-	body, err := c.HttpRequest(ctx, http.MethodPost, requestPath, nil, requestHeaders, &buf)
-	if err != nil {
-		d.SetId("")
-		return diag.FromErr(err)
+	if body == nil {
+		buf := bytes.Buffer{}
+		newRepository := client.Repository{}
+		fillRepository(&newRepository, d)
+		err := json.NewEncoder(&buf).Encode(newRepository)
+		if err != nil {
+			d.SetId("")
+			return diag.FromErr(err)
+		}
+		requestPath := fmt.Sprintf(client.RepositoryPath, c.Workspace, key)
+		requestHeaders := http.Header{
+			headers.ContentType: []string{client.ApplicationJson},
+		}
+		body, err = c.HttpRequest(ctx, http.MethodPost, requestPath, nil, requestHeaders, &buf)
+		if err != nil {
+			d.SetId("")
+			return diag.FromErr(err)
+		}
 	}
 	retVal := &client.Repository{}
 	err = json.NewDecoder(body).Decode(retVal)

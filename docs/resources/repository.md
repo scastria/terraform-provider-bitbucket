@@ -17,6 +17,7 @@ resource "bitbucket_repository" "example" {
 * `key` - **(Required, String)** The key of the repository.
 * `name` - **(Optional, String)** The name of the repository.
 * `is_private` - **(Optional, Boolean)** Whether the repository is private. Default: `true`
+* `use_existing` - **(Optional, Boolean, IgnoreDiffs)** During a CREATE only, look for an existing repository with the same key.  Prevents the need for an import. Default: `false`
 ## Attribute Reference
 * `id` - **(String)** The UUID of the repository.
 ## Import

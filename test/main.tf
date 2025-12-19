@@ -18,6 +18,7 @@ resource "bitbucket_repository" "Repo" {
   key         = "shawn-test"
   name = "Shawn-Test"
   is_private   = true
+  # use_existing = true
 }
 
 # output "Test" {
