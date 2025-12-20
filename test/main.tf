@@ -15,10 +15,9 @@ data "bitbucket_project" "Proj" {
 
 resource "bitbucket_repository" "Repo" {
   project_id = data.bitbucket_project.Proj.id
-  key         = "shawn-test"
-  name = "Shawn-Test"
+  name = "Shawn Test"
   is_private   = true
-  # use_existing = true
+  use_existing = true
 }
 
 resource "bitbucket_pipelines_config" "PipeConfig" {

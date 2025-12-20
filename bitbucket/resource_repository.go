@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/go-http-utils/headers"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -27,13 +28,9 @@ func resourceRepository() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"key": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
 			"name": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"is_private": {
 				Type:     schema.TypeBool,
@@ -52,18 +49,13 @@ func resourceRepository() *schema.Resource {
 
 func fillRepository(c *client.Repository, d *schema.ResourceData) {
 	c.Project.Uuid = d.Get("project_id").(string)
-	c.Slug = d.Get("key").(string)
-	name, ok := d.GetOk("name")
-	if ok {
-		c.Name = name.(string)
-	}
+	c.Name = d.Get("name").(string)
 	c.IsPrivate = d.Get("is_private").(bool)
 	c.UseExisting = d.Get("use_existing").(bool)
 }
 
 func fillResourceDataFromRepository(c *client.Repository, d *schema.ResourceData) {
 	d.Set("project_id", c.Project.Uuid)
-	d.Set("key", c.Slug)
 	d.Set("name", c.Name)
 	d.Set("is_private", c.IsPrivate)
 	d.Set("use_existing", c.UseExisting)
@@ -74,11 +66,13 @@ func resourceRepositoryCreate(ctx context.Context, d *schema.ResourceData, m int
 	c := m.(*client.Client)
 	newRepository := client.Repository{}
 	fillRepository(&newRepository, d)
+	// Must convert name to slug
+	slug := strings.ReplaceAll(strings.ToLower(newRepository.Name), " ", "-")
 	var body *bytes.Buffer = nil
 	var err error
 	if newRepository.UseExisting {
-		// Try to read an existing repo with the given key and return it if found
-		requestPath := fmt.Sprintf(client.RepositoryPath, c.Workspace, newRepository.Slug)
+		// Try to read an existing repo with the given slug and return it if found
+		requestPath := fmt.Sprintf(client.RepositoryPath, c.Workspace, slug)
 		body, err = c.HttpRequest(ctx, false, http.MethodGet, requestPath, nil, nil, &bytes.Buffer{})
 		if err != nil {
 			re := err.(*client.RequestError)
@@ -95,7 +89,7 @@ func resourceRepositoryCreate(ctx context.Context, d *schema.ResourceData, m int
 			d.SetId("")
 			return diag.FromErr(err)
 		}
-		requestPath := fmt.Sprintf(client.RepositoryPath, c.Workspace, newRepository.Slug)
+		requestPath := fmt.Sprintf(client.RepositoryPath, c.Workspace, slug)
 		requestHeaders := http.Header{
 			headers.ContentType: []string{client.ApplicationJson},
 		}
