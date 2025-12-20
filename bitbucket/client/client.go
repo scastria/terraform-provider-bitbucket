@@ -15,12 +15,13 @@ import (
 )
 
 const (
-	BBTokenServerUrl = "https://bitbucket.org/site/oauth2/access_token"
-	BBApiServerUrl   = "https://api.bitbucket.org/2.0"
-	ApplicationJson  = "application/json"
-	FormEncoded      = "application/x-www-form-urlencoded"
-	Bearer           = "Bearer"
-	IdSeparator      = ":"
+	BBTokenServerUrl       = "https://bitbucket.org/site/oauth2/access_token"
+	BBApiServerUrl         = "https://api.bitbucket.org/2.0"
+	BBInternalApiServerUrl = "https://api.bitbucket.org/internal"
+	ApplicationJson        = "application/json"
+	FormEncoded            = "application/x-www-form-urlencoded"
+	Bearer                 = "Bearer"
+	IdSeparator            = ":"
 )
 
 type Client struct {
@@ -87,8 +88,8 @@ func NewClient(ctx context.Context, workspace string, accessToken string, client
 	return c, nil
 }
 
-func (c *Client) HttpRequest(ctx context.Context, method string, path string, query url.Values, headerMap http.Header, body *bytes.Buffer) (*bytes.Buffer, error) {
-	req, err := http.NewRequest(method, c.RequestPath(path), body)
+func (c *Client) HttpRequest(ctx context.Context, isInternal bool, method string, path string, query url.Values, headerMap http.Header, body *bytes.Buffer) (*bytes.Buffer, error) {
+	req, err := http.NewRequest(method, c.RequestPath(isInternal, path), body)
 	if err != nil {
 		return nil, &RequestError{StatusCode: http.StatusInternalServerError, Err: err}
 	}
@@ -149,6 +150,12 @@ func (c *Client) HttpRequest(ctx context.Context, method string, path string, qu
 	return respBody, nil
 }
 
-func (c *Client) RequestPath(path string) string {
-	return fmt.Sprintf("%s/%s", BBApiServerUrl, path)
+func (c *Client) RequestPath(isInternal bool, path string) string {
+	var serverUrl string
+	if isInternal {
+		serverUrl = BBInternalApiServerUrl
+	} else {
+		serverUrl = BBApiServerUrl
+	}
+	return fmt.Sprintf("%s/%s", serverUrl, path)
 }

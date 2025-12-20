@@ -77,7 +77,7 @@ func resourceRepositoryCreate(ctx context.Context, d *schema.ResourceData, m int
 	if useExisting {
 		// Try to read an existing repo with the given key and return it if found
 		requestPath := fmt.Sprintf(client.RepositoryPath, c.Workspace, key)
-		body, err = c.HttpRequest(ctx, http.MethodGet, requestPath, nil, nil, &bytes.Buffer{})
+		body, err = c.HttpRequest(ctx, false, http.MethodGet, requestPath, nil, nil, &bytes.Buffer{})
 		if err != nil {
 			re := err.(*client.RequestError)
 			if re.StatusCode != http.StatusNotFound {
@@ -99,7 +99,7 @@ func resourceRepositoryCreate(ctx context.Context, d *schema.ResourceData, m int
 		requestHeaders := http.Header{
 			headers.ContentType: []string{client.ApplicationJson},
 		}
-		body, err = c.HttpRequest(ctx, http.MethodPost, requestPath, nil, requestHeaders, &buf)
+		body, err = c.HttpRequest(ctx, false, http.MethodPost, requestPath, nil, requestHeaders, &buf)
 		if err != nil {
 			d.SetId("")
 			return diag.FromErr(err)
@@ -120,7 +120,7 @@ func resourceRepositoryRead(ctx context.Context, d *schema.ResourceData, m inter
 	var diags diag.Diagnostics
 	c := m.(*client.Client)
 	requestPath := fmt.Sprintf(client.RepositoryPath, c.Workspace, d.Id())
-	body, err := c.HttpRequest(ctx, http.MethodGet, requestPath, nil, nil, &bytes.Buffer{})
+	body, err := c.HttpRequest(ctx, false, http.MethodGet, requestPath, nil, nil, &bytes.Buffer{})
 	if err != nil {
 		d.SetId("")
 		re := err.(*client.RequestError)
@@ -153,7 +153,7 @@ func resourceRepositoryUpdate(ctx context.Context, d *schema.ResourceData, m int
 	requestHeaders := http.Header{
 		headers.ContentType: []string{client.ApplicationJson},
 	}
-	body, err := c.HttpRequest(ctx, http.MethodPut, requestPath, nil, requestHeaders, &buf)
+	body, err := c.HttpRequest(ctx, false, http.MethodPut, requestPath, nil, requestHeaders, &buf)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -170,7 +170,7 @@ func resourceRepositoryDelete(ctx context.Context, d *schema.ResourceData, m int
 	var diags diag.Diagnostics
 	c := m.(*client.Client)
 	requestPath := fmt.Sprintf(client.RepositoryPath, c.Workspace, d.Id())
-	_, err := c.HttpRequest(ctx, http.MethodDelete, requestPath, nil, nil, &bytes.Buffer{})
+	_, err := c.HttpRequest(ctx, false, http.MethodDelete, requestPath, nil, nil, &bytes.Buffer{})
 	if err != nil {
 		return diag.FromErr(err)
 	}

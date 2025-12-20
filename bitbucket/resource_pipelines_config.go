@@ -62,7 +62,7 @@ func resourcePipelinesConfigCreate(ctx context.Context, d *schema.ResourceData, 
 	requestHeaders := http.Header{
 		headers.ContentType: []string{client.ApplicationJson},
 	}
-	body, err := c.HttpRequest(ctx, http.MethodPut, requestPath, nil, requestHeaders, &buf)
+	body, err := c.HttpRequest(ctx, false, http.MethodPut, requestPath, nil, requestHeaders, &buf)
 	if err != nil {
 		d.SetId("")
 		return diag.FromErr(err)
@@ -83,7 +83,7 @@ func resourcePipelinesConfigRead(ctx context.Context, d *schema.ResourceData, m 
 	var diags diag.Diagnostics
 	c := m.(*client.Client)
 	requestPath := fmt.Sprintf(client.PipelinesConfigPath, c.Workspace, d.Id())
-	body, err := c.HttpRequest(ctx, http.MethodGet, requestPath, nil, nil, &bytes.Buffer{})
+	body, err := c.HttpRequest(ctx, false, http.MethodGet, requestPath, nil, nil, &bytes.Buffer{})
 	if err != nil {
 		d.SetId("")
 		re := err.(*client.RequestError)
@@ -117,7 +117,7 @@ func resourcePipelinesConfigUpdate(ctx context.Context, d *schema.ResourceData, 
 	requestHeaders := http.Header{
 		headers.ContentType: []string{client.ApplicationJson},
 	}
-	body, err := c.HttpRequest(ctx, http.MethodPut, requestPath, nil, requestHeaders, &buf)
+	body, err := c.HttpRequest(ctx, false, http.MethodPut, requestPath, nil, requestHeaders, &buf)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -147,7 +147,7 @@ func resourcePipelinesConfigDelete(ctx context.Context, d *schema.ResourceData, 
 	requestHeaders := http.Header{
 		headers.ContentType: []string{client.ApplicationJson},
 	}
-	_, err = c.HttpRequest(ctx, http.MethodPut, requestPath, nil, requestHeaders, &buf)
+	_, err = c.HttpRequest(ctx, false, http.MethodPut, requestPath, nil, requestHeaders, &buf)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -26,6 +26,11 @@ resource "bitbucket_pipelines_config" "PipeConfig" {
   is_enabled       = true
 }
 
+# resource "bitbucket_dynamic_pipelines_provider" "DynoProvider" {
+#   repository_id = bitbucket_repository.Repo.id
+#   provider_id = "XXXX"
+# }
+
 # output "Test" {
 #   value = data.bitbucket_project.Proj.id
 # }

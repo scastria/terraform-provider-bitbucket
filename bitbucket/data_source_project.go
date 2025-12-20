@@ -31,7 +31,7 @@ func dataSourceProjectRead(ctx context.Context, d *schema.ResourceData, m interf
 	key := d.Get("key").(string)
 	requestPath := fmt.Sprintf(client.ProjectPath, c.Workspace, key)
 	requestQuery := url.Values{}
-	body, err := c.HttpRequest(ctx, http.MethodGet, requestPath, requestQuery, nil, &bytes.Buffer{})
+	body, err := c.HttpRequest(ctx, false, http.MethodGet, requestPath, requestQuery, nil, &bytes.Buffer{})
 	if err != nil {
 		d.SetId("")
 		re := err.(*client.RequestError)

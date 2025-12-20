@@ -50,8 +50,9 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"bitbucket_repository":       resourceRepository(),
-			"bitbucket_pipelines_config": resourcePipelinesConfig(),
+			"bitbucket_repository":                 resourceRepository(),
+			"bitbucket_pipelines_config":           resourcePipelinesConfig(),
+			"bitbucket_dynamic_pipelines_provider": resourceDynamicPipelinesProvider(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"bitbucket_project": dataSourceProject(),
