@@ -17,7 +17,7 @@ resource "bitbucket_pipelines_config" "example" {
 }
 ```
 ## Argument Reference
-* `repository_id` - **(Required, String)** The id of the repository.
+* `repository_id` - **(Required, ForceNew, String)** The id of the repository.
 * `is_enabled` - **(Optional, Boolean)** Whether pipelines are enabled. Default: `false`
 ## Attribute Reference
 * `id` - **(String)** The UUID of the repository.

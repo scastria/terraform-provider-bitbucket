@@ -17,7 +17,7 @@ resource "bitbucket_dynamic_pipelines_provider" "example" {
 }
 ```
 ## Argument Reference
-* `repository_id` - **(Required, String)** The id of the repository.
+* `repository_id` - **(Required, ForceNew, String)** The id of the repository.
 * `provider_id` - **(Required, String)** The id of the provider.
 ## Attribute Reference
 * `id` - **(String)** The UUID of the repository.

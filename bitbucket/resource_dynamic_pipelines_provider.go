@@ -26,6 +26,7 @@ func resourceDynamicPipelinesProvider() *schema.Resource {
 			"repository_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"provider_id": {
 				Type:     schema.TypeString,

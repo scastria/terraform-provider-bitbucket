@@ -58,6 +58,7 @@ func fillRepository(c *client.Repository, d *schema.ResourceData) {
 		c.Name = name.(string)
 	}
 	c.IsPrivate = d.Get("is_private").(bool)
+	c.UseExisting = d.Get("use_existing").(bool)
 }
 
 func fillResourceDataFromRepository(c *client.Repository, d *schema.ResourceData) {
@@ -65,18 +66,19 @@ func fillResourceDataFromRepository(c *client.Repository, d *schema.ResourceData
 	d.Set("key", c.Slug)
 	d.Set("name", c.Name)
 	d.Set("is_private", c.IsPrivate)
+	d.Set("use_existing", c.UseExisting)
 }
 
 func resourceRepositoryCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*client.Client)
-	key := d.Get("key").(string)
-	useExisting := d.Get("use_existing").(bool)
+	newRepository := client.Repository{}
+	fillRepository(&newRepository, d)
 	var body *bytes.Buffer = nil
 	var err error
-	if useExisting {
+	if newRepository.UseExisting {
 		// Try to read an existing repo with the given key and return it if found
-		requestPath := fmt.Sprintf(client.RepositoryPath, c.Workspace, key)
+		requestPath := fmt.Sprintf(client.RepositoryPath, c.Workspace, newRepository.Slug)
 		body, err = c.HttpRequest(ctx, false, http.MethodGet, requestPath, nil, nil, &bytes.Buffer{})
 		if err != nil {
 			re := err.(*client.RequestError)
@@ -88,14 +90,12 @@ func resourceRepositoryCreate(ctx context.Context, d *schema.ResourceData, m int
 	}
 	if body == nil {
 		buf := bytes.Buffer{}
-		newRepository := client.Repository{}
-		fillRepository(&newRepository, d)
 		err := json.NewEncoder(&buf).Encode(newRepository)
 		if err != nil {
 			d.SetId("")
 			return diag.FromErr(err)
 		}
-		requestPath := fmt.Sprintf(client.RepositoryPath, c.Workspace, key)
+		requestPath := fmt.Sprintf(client.RepositoryPath, c.Workspace, newRepository.Slug)
 		requestHeaders := http.Header{
 			headers.ContentType: []string{client.ApplicationJson},
 		}

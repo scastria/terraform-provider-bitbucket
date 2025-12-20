@@ -26,6 +26,7 @@ func resourcePipelinesConfig() *schema.Resource {
 			"repository_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"is_enabled": {
 				Type:     schema.TypeBool,
