@@ -1,5 +1,5 @@
-# Resource: bitbucket_repository_pipelines_config
-Represents the configuration of Pipelines for a repository.
+# Resource: bitbucket_pipelines_config
+Represents the configuration of pipelines for a repository.
 ## Example usage
 ```hcl
 data "bitbucket_project" "Proj" {
@@ -11,7 +11,7 @@ resource "bitbucket_repository" "Repo" {
   name = "My-Repo"
   is_private = true
 }
-resource "bitbucket_repository_pipelines_config" "example" {
+resource "bitbucket_pipelines_config" "example" {
   repository_id = bitbucket_repository.Repo.id
   is_enabled = true
 }
@@ -22,4 +22,4 @@ resource "bitbucket_repository_pipelines_config" "example" {
 ## Attribute Reference
 * `id` - **(String)** The UUID of the repository.
 ## Import
-Repository pipelines configs can be imported using a proper value of `id` as described above
+Pipeline configs can be imported using a proper value of `id` as described above

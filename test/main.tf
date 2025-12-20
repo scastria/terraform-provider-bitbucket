@@ -21,9 +21,9 @@ resource "bitbucket_repository" "Repo" {
   # use_existing = true
 }
 
-resource "bitbucket_repository_pipelines_config" "RepoPipeConfig" {
+resource "bitbucket_pipelines_config" "PipeConfig" {
   repository_id = bitbucket_repository.Repo.id
-  is_enabled       = false
+  is_enabled       = true
 }
 
 # output "Test" {

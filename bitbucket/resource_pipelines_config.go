@@ -13,12 +13,12 @@ import (
 	"github.com/scastria/terraform-provider-bitbucket/bitbucket/client"
 )
 
-func resourceRepositoryPipelinesConfig() *schema.Resource {
+func resourcePipelinesConfig() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceRepositoryPipelinesConfigCreate,
-		ReadContext:   resourceRepositoryPipelinesConfigRead,
-		UpdateContext: resourceRepositoryPipelinesConfigUpdate,
-		DeleteContext: resourceRepositoryPipelinesConfigDelete,
+		CreateContext: resourcePipelinesConfigCreate,
+		ReadContext:   resourcePipelinesConfigRead,
+		UpdateContext: resourcePipelinesConfigUpdate,
+		DeleteContext: resourcePipelinesConfigDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -36,29 +36,29 @@ func resourceRepositoryPipelinesConfig() *schema.Resource {
 	}
 }
 
-func fillRepositoryPipelinesConfig(c *client.RepositoryPipelinesConfig, d *schema.ResourceData) {
+func fillPipelinesConfig(c *client.PipelinesConfig, d *schema.ResourceData) {
 	c.RepositoryId = d.Get("repository_id").(string)
 	c.Enabled = d.Get("is_enabled").(bool)
 }
 
-func fillResourceDataFromRepositoryPipelinesConfig(c *client.RepositoryPipelinesConfig, d *schema.ResourceData) {
+func fillResourceDataFromPipelinesConfig(c *client.PipelinesConfig, d *schema.ResourceData) {
 	d.Set("repository_id", c.RepositoryId)
 	d.Set("is_enabled", c.Enabled)
 }
 
-func resourceRepositoryPipelinesConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePipelinesConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*client.Client)
 	repositoryId := d.Get("repository_id").(string)
 	buf := bytes.Buffer{}
-	newRepositoryPipelinesConfig := client.RepositoryPipelinesConfig{}
-	fillRepositoryPipelinesConfig(&newRepositoryPipelinesConfig, d)
-	err := json.NewEncoder(&buf).Encode(newRepositoryPipelinesConfig)
+	newPipelinesConfig := client.PipelinesConfig{}
+	fillPipelinesConfig(&newPipelinesConfig, d)
+	err := json.NewEncoder(&buf).Encode(newPipelinesConfig)
 	if err != nil {
 		d.SetId("")
 		return diag.FromErr(err)
 	}
-	requestPath := fmt.Sprintf(client.RepositoryPipelinesConfigPath, c.Workspace, repositoryId)
+	requestPath := fmt.Sprintf(client.PipelinesConfigPath, c.Workspace, repositoryId)
 	requestHeaders := http.Header{
 		headers.ContentType: []string{client.ApplicationJson},
 	}
@@ -67,22 +67,22 @@ func resourceRepositoryPipelinesConfigCreate(ctx context.Context, d *schema.Reso
 		d.SetId("")
 		return diag.FromErr(err)
 	}
-	retVal := &client.RepositoryPipelinesConfig{}
+	retVal := &client.PipelinesConfig{}
 	err = json.NewDecoder(body).Decode(retVal)
 	if err != nil {
 		d.SetId("")
 		return diag.FromErr(err)
 	}
 	retVal.RepositoryId = repositoryId
-	fillResourceDataFromRepositoryPipelinesConfig(retVal, d)
+	fillResourceDataFromPipelinesConfig(retVal, d)
 	d.SetId(repositoryId)
 	return diags
 }
 
-func resourceRepositoryPipelinesConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePipelinesConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*client.Client)
-	requestPath := fmt.Sprintf(client.RepositoryPipelinesConfigPath, c.Workspace, d.Id())
+	requestPath := fmt.Sprintf(client.PipelinesConfigPath, c.Workspace, d.Id())
 	body, err := c.HttpRequest(ctx, http.MethodGet, requestPath, nil, nil, &bytes.Buffer{})
 	if err != nil {
 		d.SetId("")
@@ -92,28 +92,28 @@ func resourceRepositoryPipelinesConfigRead(ctx context.Context, d *schema.Resour
 		}
 		return diag.FromErr(err)
 	}
-	retVal := &client.RepositoryPipelinesConfig{}
+	retVal := &client.PipelinesConfig{}
 	err = json.NewDecoder(body).Decode(retVal)
 	if err != nil {
 		d.SetId("")
 		return diag.FromErr(err)
 	}
 	retVal.RepositoryId = d.Id()
-	fillResourceDataFromRepositoryPipelinesConfig(retVal, d)
+	fillResourceDataFromPipelinesConfig(retVal, d)
 	return diags
 }
 
-func resourceRepositoryPipelinesConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePipelinesConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*client.Client)
 	buf := bytes.Buffer{}
-	upRepositoryPipelinesConfig := client.RepositoryPipelinesConfig{}
-	fillRepositoryPipelinesConfig(&upRepositoryPipelinesConfig, d)
-	err := json.NewEncoder(&buf).Encode(upRepositoryPipelinesConfig)
+	upPipelinesConfig := client.PipelinesConfig{}
+	fillPipelinesConfig(&upPipelinesConfig, d)
+	err := json.NewEncoder(&buf).Encode(upPipelinesConfig)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	requestPath := fmt.Sprintf(client.RepositoryPipelinesConfigPath, c.Workspace, d.Id())
+	requestPath := fmt.Sprintf(client.PipelinesConfigPath, c.Workspace, d.Id())
 	requestHeaders := http.Header{
 		headers.ContentType: []string{client.ApplicationJson},
 	}
@@ -121,17 +121,36 @@ func resourceRepositoryPipelinesConfigUpdate(ctx context.Context, d *schema.Reso
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	retVal := &client.RepositoryPipelinesConfig{}
+	retVal := &client.PipelinesConfig{}
 	err = json.NewDecoder(body).Decode(retVal)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	retVal.RepositoryId = d.Id()
-	fillResourceDataFromRepositoryPipelinesConfig(retVal, d)
+	fillResourceDataFromPipelinesConfig(retVal, d)
 	return diags
 }
 
-func resourceRepositoryPipelinesConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePipelinesConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
+	c := m.(*client.Client)
+	buf := bytes.Buffer{}
+	// Set to false to simulate deletion
+	upPipelinesConfig := client.PipelinesConfig{
+		Enabled: false,
+	}
+	err := json.NewEncoder(&buf).Encode(upPipelinesConfig)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	requestPath := fmt.Sprintf(client.PipelinesConfigPath, c.Workspace, d.Id())
+	requestHeaders := http.Header{
+		headers.ContentType: []string{client.ApplicationJson},
+	}
+	_, err = c.HttpRequest(ctx, http.MethodPut, requestPath, nil, requestHeaders, &buf)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.SetId("")
 	return diags
 }
