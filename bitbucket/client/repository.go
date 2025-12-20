@@ -9,5 +9,5 @@ type Repository struct {
 	Slug      string  `json:"slug,omitempty"`
 	Project   Project `json:"project,omitempty"`
 	Name      string  `json:"name,omitempty"`
-	IsPrivate bool    `json:"is_private,omitempty"`
+	IsPrivate bool    `json:"is_private"`
 }

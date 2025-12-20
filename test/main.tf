@@ -21,6 +21,11 @@ resource "bitbucket_repository" "Repo" {
   # use_existing = true
 }
 
+resource "bitbucket_repository_pipelines_config" "RepoPipeConfig" {
+  repository_id = bitbucket_repository.Repo.id
+  is_enabled       = false
+}
+
 # output "Test" {
 #   value = data.bitbucket_project.Proj.id
 # }
