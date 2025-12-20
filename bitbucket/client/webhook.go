@@ -4,7 +4,7 @@ import "strings"
 
 const (
 	WebhookPath    = "/repositories/%s/%s/hooks"
-	WebhookPathGet = "/repositories/%s/%s/hooks/%s"
+	WebhookPathGet = WebhookPath + "/%s"
 )
 
 type Webhook struct {

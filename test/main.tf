@@ -26,6 +26,12 @@ resource "bitbucket_pipelines_config" "PipeConfig" {
   is_enabled       = true
 }
 
+resource "bitbucket_environment" "Env" {
+  repository_id = bitbucket_repository.Repo.id
+  name = "Hello_world"
+  type = "Test"
+}
+
 # resource "bitbucket_webhook" "Hook" {
 #   repository_id = bitbucket_repository.Repo.id
 #   url = "XXXX"
