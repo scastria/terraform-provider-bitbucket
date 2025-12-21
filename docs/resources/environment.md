@@ -22,7 +22,7 @@ resource "bitbucket_environment" "example" {
 * `name` - **(Required, String)** The name of the environment.
 * `type` - **(Required, ForceNew, String)** The type of the environment. Allowed values: `Test`, `Staging`, `Production`
 * `is_admin_only` - **(Optional, Boolean)** Whether deployment to the environment requires admin permissions. Default: `false`
-* `use_existing` - **(Optional, Boolean, IgnoreDiffs)** During a CREATE only, look for an existing environment with the same name.  Prevents the need for an import. Default: `false`
+* `use_existing` - **(Optional, Boolean, IgnoreDiffs)** During a CREATE only, look for an existing environment with the same `name`.  Prevents the need for an import. Default: `false`
 ## Attribute Reference
 * `id` - **(String)** Same as `repository_id`:`uuid`
 * `uuid` - **(String)** Uuid of the environment

@@ -26,7 +26,7 @@ resource "bitbucket_webhook" "example" {
 * `title` - **(Optional, String)** The title of the webhook.
 * `events` - **(Required, List of String)** The events that should cause the webhook to be triggered.
 * `is_active` - **(Optional, Boolean)** Whether the webhook is active. Default: `true`
-* `use_existing` - **(Optional, Boolean, IgnoreDiffs)** During a CREATE only, look for an existing webhook with the same url.  Prevents the need for an import. Default: `false`
+* `use_existing` - **(Optional, Boolean, IgnoreDiffs)** During a CREATE only, look for an existing webhook with the same `url`.  Prevents the need for an import. Default: `false`
 ## Attribute Reference
 * `id` - **(String)** Same as `repository_id`:`uuid`
 * `uuid` - **(String)** Uuid of the webhook

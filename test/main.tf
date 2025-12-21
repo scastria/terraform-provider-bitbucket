@@ -33,6 +33,15 @@ resource "bitbucket_environment" "Env" {
   use_existing = true
 }
 
+resource "bitbucket_restriction" "Restrict" {
+  repository_id = bitbucket_repository.Repo.id
+  kind = "require_passing_builds_to_merge"
+  branch_match_kind = "branching_model"
+  branch_type = "production"
+  value = 1
+  use_existing = true
+}
+
 # resource "bitbucket_webhook" "Hook" {
 #   repository_id = bitbucket_repository.Repo.id
 #   url = "XXXX"
