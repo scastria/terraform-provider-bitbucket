@@ -29,6 +29,8 @@ resource "bitbucket_environment" "Env" {
   repository_id = bitbucket_repository.Repo.id
   name = "Hello_world"
   type = "Test"
+  is_admin_only = true
+  use_existing = true
 }
 
 # resource "bitbucket_webhook" "Hook" {

@@ -39,6 +39,17 @@ func resourceEnvironment() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Test", "Staging", "Production"}, false),
 			},
+			"is_admin_only": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"use_existing": {
+				Type:             schema.TypeBool,
+				Optional:         true,
+				Default:          false,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool { return d.Id() != "" },
+			},
 			"uuid": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -51,13 +62,17 @@ func fillEnvironment(c *client.Environment, d *schema.ResourceData) {
 	c.RepositoryId = d.Get("repository_id").(string)
 	c.Name = d.Get("name").(string)
 	c.Type.Name = d.Get("type").(string)
+	c.Restrictions.AdminOnly = d.Get("is_admin_only").(bool)
+	c.UseExisting = d.Get("use_existing").(bool)
 }
 
 func fillResourceDataFromEnvironment(c *client.Environment, d *schema.ResourceData) {
 	d.Set("repository_id", c.RepositoryId)
 	d.Set("name", c.Name)
 	d.Set("type", c.Type.Name)
+	d.Set("is_admin_only", c.Restrictions.AdminOnly)
 	d.Set("uuid", c.Uuid)
+	d.Set("use_existing", c.UseExisting)
 }
 
 func resourceEnvironmentCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -66,6 +81,28 @@ func resourceEnvironmentCreate(ctx context.Context, d *schema.ResourceData, m in
 	newEnvironment := client.Environment{}
 	fillEnvironment(&newEnvironment, d)
 	var retVal *client.Environment = nil
+	if newEnvironment.UseExisting {
+		// Try to find an existing environment with the given name and return it if found
+		// TODO: Paginate through results if many environments exist
+		requestPath := fmt.Sprintf(client.EnvironmentPath, c.Workspace, newEnvironment.RepositoryId)
+		body, err := c.HttpRequest(ctx, false, http.MethodGet, requestPath, nil, nil, &bytes.Buffer{})
+		if err != nil {
+			d.SetId("")
+			return diag.FromErr(err)
+		}
+		retVals := &client.EnvironmentCollection{}
+		err = json.NewDecoder(body).Decode(retVals)
+		if err != nil {
+			d.SetId("")
+			return diag.FromErr(err)
+		}
+		for _, e := range retVals.Values {
+			if e.Name == newEnvironment.Name {
+				retVal = &e
+				break
+			}
+		}
+	}
 	if retVal == nil {
 		buf := bytes.Buffer{}
 		err := json.NewEncoder(&buf).Encode(newEnvironment)
@@ -127,6 +164,7 @@ func resourceEnvironmentUpdate(ctx context.Context, d *schema.ResourceData, m in
 	buf := bytes.Buffer{}
 	upEnvironment := client.EnvironmentChanges{}
 	upEnvironment.Change.Name = d.Get("name").(string)
+	upEnvironment.Change.Restrictions.AdminOnly = d.Get("is_admin_only").(bool)
 	err := json.NewEncoder(&buf).Encode(upEnvironment)
 	if err != nil {
 		return diag.FromErr(err)

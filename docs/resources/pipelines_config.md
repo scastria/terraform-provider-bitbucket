@@ -7,8 +7,7 @@ data "bitbucket_project" "Proj" {
 }
 resource "bitbucket_repository" "Repo" {
   project_id = data.bitbucket_project.Proj.id
-  key = "MyRepoKey"
-  name = "My-Repo"
+  name = "My Repo"
   is_private = true
 }
 resource "bitbucket_pipelines_config" "example" {

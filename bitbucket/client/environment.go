@@ -9,19 +9,25 @@ const (
 )
 
 type Environment struct {
-	RepositoryId string          `json:"-"`
-	Uuid         string          `json:"uuid,omitempty"`
-	Name         string          `json:"name,omitempty"`
-	Type         EnvironmentType `json:"environment_type,omitempty"`
+	RepositoryId string                  `json:"-"`
+	Uuid         string                  `json:"uuid,omitempty"`
+	Name         string                  `json:"name,omitempty"`
+	Type         EnvironmentType         `json:"environment_type,omitempty"`
+	Restrictions EnvironmentRestrictions `json:"restrictions,omitempty"`
+	UseExisting  bool                    `json:"-"`
 }
 type EnvironmentType struct {
 	Name string `json:"name,omitempty"`
+}
+type EnvironmentRestrictions struct {
+	AdminOnly bool `json:"admin_only"`
 }
 type EnvironmentChanges struct {
 	Change EnvironmentChange `json:"change,omitempty"`
 }
 type EnvironmentChange struct {
-	Name string `json:"name,omitempty"`
+	Name         string                  `json:"name,omitempty"`
+	Restrictions EnvironmentRestrictions `json:"restrictions,omitempty"`
 }
 type EnvironmentCollection struct {
 	Values []Environment `json:"values"`
