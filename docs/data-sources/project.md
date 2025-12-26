@@ -7,6 +7,7 @@ data "bitbucket_project" "example" {
 }
 ```
 ## Argument Reference
-* `key` - **(Required, String)** The key of the project.
+* `key` - **(Optional, String)** The key of the project.
+* `contains_repository_name` - **(Optional, String)** The name of a repository that is contained within the project.
 ## Attribute Reference
 * `id` - **(String)** The UUID of the project.

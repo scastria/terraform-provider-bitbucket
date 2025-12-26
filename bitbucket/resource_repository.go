@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/go-http-utils/headers"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -67,7 +66,7 @@ func resourceRepositoryCreate(ctx context.Context, d *schema.ResourceData, m int
 	newRepository := client.Repository{}
 	fillRepository(&newRepository, d)
 	// Must convert name to slug
-	slug := strings.ReplaceAll(strings.ToLower(newRepository.Name), " ", "-")
+	slug := convertNameToSlug(newRepository.Name)
 	var body *bytes.Buffer = nil
 	var err error
 	if newRepository.UseExisting {

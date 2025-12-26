@@ -18,8 +18,16 @@ func dataSourceProject() *schema.Resource {
 		ReadContext: dataSourceProjectRead,
 		Schema: map[string]*schema.Schema{
 			"key": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"contains_repository_name"},
+				AtLeastOneOf:  []string{"key", "contains_repository_name"},
+			},
+			"contains_repository_name": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"key"},
+				AtLeastOneOf:  []string{"key", "contains_repository_name"},
 			},
 		},
 	}
@@ -29,6 +37,28 @@ func dataSourceProjectRead(ctx context.Context, d *schema.ResourceData, m interf
 	var diags diag.Diagnostics
 	c := m.(*client.Client)
 	key := d.Get("key").(string)
+	containsRepositoryName := d.Get("contains_repository_name").(string)
+	if containsRepositoryName != "" {
+		slug := convertNameToSlug(containsRepositoryName)
+		requestPath := fmt.Sprintf(client.RepositoryPath, c.Workspace, slug)
+		requestQuery := url.Values{}
+		body, err := c.HttpRequest(ctx, false, http.MethodGet, requestPath, requestQuery, nil, &bytes.Buffer{})
+		if err != nil {
+			d.SetId("")
+			re := err.(*client.RequestError)
+			if re.StatusCode == http.StatusNotFound {
+				return diags
+			}
+			return diag.FromErr(err)
+		}
+		retVal := &client.Repository{}
+		err = json.NewDecoder(body).Decode(retVal)
+		if err != nil {
+			d.SetId("")
+			return diag.FromErr(err)
+		}
+		key = retVal.Project.Key
+	}
 	requestPath := fmt.Sprintf(client.ProjectPath, c.Workspace, key)
 	requestQuery := url.Values{}
 	body, err := c.HttpRequest(ctx, false, http.MethodGet, requestPath, requestQuery, nil, &bytes.Buffer{})
